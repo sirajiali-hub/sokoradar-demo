@@ -15,4 +15,7 @@ pages = st.navigation([
     st.Page("app_pages/results.py", title="Does it work?", icon=":material/fact_check:"),
     st.Page("app_pages/about.py", title="About", icon=":material/info:"),
 ])
+with st.sidebar:
+    st.markdown("## :orange[SokoRadar]")
+    st.caption("Early warning of food price shocks in Kenyan counties. Group 10, Moringa School capstone.")
 pages.run()
