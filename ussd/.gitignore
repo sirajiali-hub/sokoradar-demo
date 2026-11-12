@@ -1,0 +1,5 @@
+# subscribers are personal data: never commit them
+data/subscribers.csv
+data/*.tmp
+.env
+__pycache__/

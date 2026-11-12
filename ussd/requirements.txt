@@ -1,0 +1,4 @@
+flask>=3.0
+pandas>=2.0
+africastalking>=1.2
+gunicorn>=21.2

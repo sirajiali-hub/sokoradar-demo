@@ -1,0 +1,11 @@
+{
+ "forecast_from": "2024-12",
+ "price_data_to": "2024-12",
+ "series": 1222,
+ "made_from": [
+  "sokoradar_final.csv",
+  "sokoradar_forecasts.csv",
+  "SokoRadar_County_2006_2024_long.csv"
+ ],
+ "made_on": "2026-11-12"
+}
