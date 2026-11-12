@@ -24,7 +24,7 @@ def ussd():
         reply = menu.handle(text, phone)
     except Exception:                       # never leave a user on a broken screen
         app.logger.exception("USSD error for text=%r", text)
-        reply = "END Samahani, kuna tatizo. Jaribu baadaye. (Sorry, try later)"
+        reply = "END Samahani, kuna tatizo. Jaribu baadaye. / Sorry, try later."
     return reply, 200, {"Content-Type": "text/plain; charset=utf-8"}
 
 

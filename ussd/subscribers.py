@@ -10,7 +10,7 @@ from datetime import date
 from pathlib import Path
 
 FILE = Path(os.environ.get("SOKORADAR_SUBSCRIBERS", Path(__file__).parent / "data" / "subscribers.csv"))
-FIELDS = ["phone", "county", "joined"]
+FIELDS = ["phone", "county", "lang", "joined"]
 
 
 def load():
@@ -30,15 +30,15 @@ def _save(rows):
     os.replace(tmp, FILE)
 
 
-def add(phone, county):
-    """Subscribe (or move) a phone number to one county."""
-    rows = [r for r in load() if r["phone"] != phone]
-    rows.append({"phone": phone, "county": county, "joined": date.today().isoformat()})
+def add(phone, county, lang="sw"):
+    """Subscribe (or move) a phone number to one county, with the language of its SMS."""
+    rows = [{**r, "lang": r.get("lang") or "sw"} for r in load() if r["phone"] != phone]
+    rows.append({"phone": phone, "county": county, "lang": lang, "joined": date.today().isoformat()})
     _save(rows)
 
 
 def remove(phone):
-    rows = load()
+    rows = [{**r, "lang": r.get("lang") or "sw"} for r in load()]
     keep = [r for r in rows if r["phone"] != phone]
     _save(keep)
     return len(rows) - len(keep)

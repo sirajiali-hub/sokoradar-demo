@@ -16,11 +16,13 @@ sys.path.insert(0, str(USSD))
 import menu                                   # noqa: E402  (the real USSD menu)
 from send_sms_alerts import message_for       # noqa: E402
 from sokoradar_data import counties           # noqa: E402
+from i18n import LANGUAGES, TEXT              # noqa: E402
 
 DEMO_PHONE = "+254700000000"
 
+LANG_NAMES = ", ".join(TEXT[c]["name"] for c in LANGUAGES)
 ui.header("On any phone: USSD and SMS", "Farmers and traders without a smartphone dial a short code to get the price "
-          "outlook and alerts for their county, in Kiswahili. Try the same menu here.")
+          f"outlook and alerts for their county, in their language ({LANG_NAMES}). Try the same menu here.")
 
 PHONE_CSS = """
 <div style="max-width:320px;margin:auto;background:#1f2933;border-radius:28px;padding:22px 16px 26px">
@@ -62,8 +64,10 @@ with left:
 
 with right:
     st.subheader("2. The alert SMS")
-    county = st.selectbox("Subscriber's county", counties(), index=counties().index("Garissa") if "Garissa" in counties() else 0)
-    msg = message_for(county)
+    c1, c2 = st.columns(2)
+    county = c1.selectbox("Subscriber's county", counties(), index=counties().index("Garissa") if "Garissa" in counties() else 0)
+    lang = c2.selectbox("Language", LANGUAGES, format_func=lambda c: TEXT[c]["name"])
+    msg = message_for(county, lang)
     if msg:
         st.markdown(f"<div style='background:#e3f2fd;border-radius:14px;padding:12px 14px;max-width:360px'>"
                     f"{escape(msg)}</div>", unsafe_allow_html=True)
@@ -76,6 +80,7 @@ with right:
 2. When new forecasts arrive, a script sends each subscriber the spike alerts for their county.
 3. The demo uses the Africa's Talking **sandbox**: messages appear in its online phone simulator, not on real phones.
 
-**Words used:** ONYO = warning; bei inaweza kupanda = the price may rise; Mahindi = maize, Maharagwe = beans,
-Mtama = sorghum, Viazi = potatoes; makadirio = estimate.
+**Languages:** the first screen asks for the language, and SMS come in the language chosen at sign up.
+Gikuyu, Dholuo, Luluhya, Kikamba, Kalenjin and Kimeru switch on as soon as native speakers fill their column in
+`ussd/translations.csv`.
 """)

@@ -12,17 +12,8 @@ import pandas as pd
 
 DATA_FILE = Path(os.environ.get("SOKORADAR_DATA", Path(__file__).parent / "data" / "sokoradar_final.csv"))
 
-# crops in the menu, in this order: commodity in the data -> (Kiswahili, English)
-CROPS = {
-    "Dry Maize": ("Mahindi", "Maize"),
-    "Beans Rosecoco": ("Maharagwe", "Beans"),
-    "Sorghum": ("Mtama", "Sorghum"),
-    "Red Irish Potatoes": ("Viazi", "Potatoes"),
-}
-PRICE_TYPES = {"Retail": ("Rejareja", "Retail"), "Wholesale": ("Jumla", "Wholesale")}
-# ALPS label in Kiswahili (context, not an alert)
-PHASE_SW = {"Normal": "Kawaida", "Stress": "Juu kidogo", "Alert": "Juu", "Crisis": "Juu sana"}
-MONTH_SW = ["Jan", "Feb", "Mac", "Apr", "Mei", "Jun", "Jul", "Ago", "Sep", "Okt", "Nov", "Des"]
+# crops in the menu, in this order (their names in each language are in i18n.py)
+CROPS = ["Dry Maize", "Beans Rosecoco", "Sorghum", "Red Irish Potatoes"]
 
 _cache = {"mtime": None, "df": None}
 
@@ -44,9 +35,6 @@ def counties():
     return sorted(load()["county"].unique())
 
 
-def month_sw(yyyy_mm):
-    y, m = str(yyyy_mm).split("-")[:2]
-    return f"{MONTH_SW[int(m) - 1]} {y}"
 
 
 def outlook(county, commodity, price_type, horizon=1):

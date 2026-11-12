@@ -1,4 +1,4 @@
-"""Checks every menu path through the real web endpoint, and that every screen fits on a phone.
+"""Checks every language and menu path through the real web endpoint, and that every screen fits on a phone.
 
     python test_ussd.py
 """
@@ -7,7 +7,10 @@ import tempfile
 
 os.environ["SOKORADAR_SUBSCRIBERS"] = os.path.join(tempfile.mkdtemp(), "subscribers.csv")   # never touch the real list
 
+import subscribers                     # noqa: E402
 from app import app                    # noqa: E402
+from i18n import LANGUAGES, TEXT       # noqa: E402
+from send_sms_alerts import SMS_MAX, message_for   # noqa: E402
 from sokoradar_data import counties    # noqa: E402
 
 MAX_CHARS = 182
@@ -27,34 +30,41 @@ def dial(text):
     return body
 
 
-assert dial("").startswith("CON SokoRadar")
+# every language has every word
+keys = set(TEXT["en"])
+for code in LANGUAGES:
+    assert set(TEXT[code]) == keys, (code, keys ^ set(TEXT[code]))
+
+first = dial("")
+for k, code in enumerate(LANGUAGES, 1):
+    assert TEXT[code]["name"] in first
+assert dial(str(len(LANGUAGES) + 1)).startswith("END")
 n = len(counties())
 
-# every county, every crop, both price types, through the pages (9 = next page)
-for i in range(n):
-    page, pos = divmod(i, 8)
-    path = "1" + "*9" * page + f"*{pos + 1}"
-    assert dial(path).startswith("CON")                      # crop menu
-    for crop in "1234":
-        for ptype in "12":
-            assert dial(f"{path}*{crop}*{ptype}").startswith("END")
-    assert dial("2" + "*9" * page + f"*{pos + 1}").startswith("END")      # alerts in that county
+for k, code in enumerate(LANGUAGES, 1):
+    L = str(k)
+    assert dial(L).startswith("CON " + TEXT[code]["title"])
+    for i in range(n):                                  # every county, crop and price type
+        page, pos = divmod(i, 8)
+        path = f"{L}*1" + "*9" * page + f"*{pos + 1}"
+        assert dial(path).startswith("CON")
+        for crop in "1234":
+            for ptype in "12":
+                assert dial(f"{path}*{crop}*{ptype}").startswith("END")
+        assert dial(f"{L}*2" + "*9" * page + f"*{pos + 1}").startswith("END")
+        msg = message_for(counties()[i], code)
+        assert msg is None or len(msg) <= SMS_MAX, (code, counties()[i], len(msg), msg)
+    assert "0. " + TEXT[code]["back"] in dial(f"{L}*1*9")
+    assert dial(f"{L}*1*9*0") == dial(f"{L}*1")
+    assert dial(f"{L}*7") == "END " + TEXT[code]["bad"]
+    assert dial(f"{L}*1*99") == "END " + TEXT[code]["bad"]
+    # sign up in this language, then leave
+    assert TEXT[code]["yes"] in dial(f"{L}*3*1")
+    assert dial(f"{L}*3*1*1").startswith("END " + TEXT[code]["subscribed"][:10])
+    assert subscribers.load()[0]["lang"] == code
+    assert dial(f"{L}*4") == "END " + TEXT[code]["unsubscribed"]
+    assert dial(f"{L}*4") == "END " + TEXT[code]["was_not"]
 
-# paging back and forth, and wrong keys
-assert "0. Nyuma" in dial("1*9")
-assert dial("1*9*0") == dial("1")
-assert dial("7").startswith("END Chaguo")
-assert dial("1*99").startswith("END Chaguo")
-assert dial("1*1*5").startswith("END Chaguo")
-
-# sign up, then leave
-assert "Ndiyo" in dial("3*1")
-assert dial("3*1*1").startswith("END Umejiandikisha")
-assert dial("4").startswith("END Umejiondoa")
-assert dial("4").startswith("END Hukuwa")
-assert dial("3*1*2").startswith("END Sawa")
-
-# the health page
 assert client.get("/").get_json()["status"] == "ok"
-
-print(f"All checks passed: {n} counties, {screens} screens, every screen within {MAX_CHARS} characters.")
+print(f"All checks passed: {len(LANGUAGES)} languages, {n} counties, {screens} screens, "
+      f"every screen within {MAX_CHARS} characters and every SMS within {SMS_MAX}.")

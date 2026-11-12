@@ -1,8 +1,10 @@
 # SokoRadar USSD and SMS
 
-A USSD menu that works on any phone, and an SMS script that sends spike alerts to subscribers. Both read the final SokoRadar table (forecasts plus alerts), so replies are instant and no model runs here.
+A USSD menu that works on any phone, in Kiswahili, English or Somali, and an SMS script that sends spike alerts to subscribers in their language. Both read the final SokoRadar table (forecasts plus alerts), so replies are instant and no model runs here.
 
 ## What a user sees
+
+The first screen asks for the language (now 1 Kiswahili, 2 English, 3 Soomaali; more as they are translated). Then:
 
 ```
 SokoRadar: bei za chakula
@@ -33,12 +35,23 @@ Counties are shown 8 per screen: 9 shows more, 0 goes back. Crops: maize, beans 
 |---|---|
 | `app.py` | The web app Africa's Talking calls (`POST /ussd`); `GET /` checks it is up |
 | `menu.py` | The menu screens and answers |
+| `translations.csv` | Every phrase, one column per language (Kiswahili, English, Somali, Gikuyu, Dholuo, Luluhya, Kikamba, Kalenjin, Kimeru) |
+| `i18n.py` | Reads the translations; a language goes live when its column is complete |
 | `sokoradar_data.py` | Reads the final table and looks up answers; Kiswahili names |
 | `subscribers.py` | Saves and removes SMS subscribers |
 | `send_sms_alerts.py` | Sends each subscriber the alerts for their county |
 | `simulate.py` | Try the menu in the terminal, like a phone |
 | `test_ussd.py` | Checks every county, crop and menu path, and that every screen fits on a phone |
 | `data/sokoradar_final.csv` | The final table (forecasts from December 2024 for January to March 2025) |
+
+## Add a language
+
+1. Open `translations.csv` in Excel. Each row is one phrase; column `what_it_is` says what it means, and `sw` and `en` show it in Kiswahili and English.
+2. A native speaker fills the column for their language (`ki` Gikuyu, `luo` Dholuo, `luy` Luluhya, `kam` Kikamba, `kln` Kalenjin, `mer` Kimeru), including the `name` row. Keep `{county}`, `{month}`, `{crop}`, `{phase}` and `{items}` exactly as they are.
+3. Save as **CSV UTF-8**. A second speaker checks the column.
+4. Run `python test_ussd.py`: it checks every screen still fits on a phone and every SMS in one message. Then push.
+
+The language appears on the first screen as soon as its column is complete.
 
 ## Run it on your laptop
 
