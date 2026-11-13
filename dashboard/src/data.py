@@ -8,7 +8,7 @@ import streamlit as st
 DATA = Path(__file__).resolve().parents[2] / "data"
 CORE = ["Dry Maize", "Beans Rosecoco", "Sorghum", "Red Irish Potatoes"]
 PHASES = ["Normal", "Stress", "Alert", "Crisis"]
-PHASE_COLOR = {"Normal": "#9e9e9e", "Stress": "#f9a825", "Alert": "#ef6c00", "Crisis": "#c62828"}
+PHASE_COLOR = {"Normal": "#6b7d91", "Stress": "#f5c542", "Alert": "#ff8a3d", "Crisis": "#e5484d"}
 PHASE_TEXT = {"Normal": "normal for the season", "Stress": "a little high for the season",
               "Alert": "high for the season", "Crisis": "very high for the season"}
 

@@ -7,7 +7,7 @@ import pandas as pd
 
 
 def header(title, subtitle):
-    st.markdown("<div style='color:#ef6c00;font-weight:700;letter-spacing:.06em'>SOKORADAR · FOOD PRICE EARLY WARNING</div>",
+    st.markdown("<div style='color:#ff8a3d;font-weight:700;letter-spacing:.06em'>SOKORADAR · FOOD PRICE EARLY WARNING</div>",
                 unsafe_allow_html=True)
     st.title(title)
     st.caption(subtitle)

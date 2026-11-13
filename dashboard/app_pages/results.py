@@ -23,9 +23,9 @@ t = pd.DataFrame({"Months ahead": [1, 2, 3], "Rises caught %": [SPIKE["caught"][
 c1, c2 = st.columns([2, 3])
 c1.dataframe(t, hide_index=True, width="stretch")
 fig = go.Figure()
-fig.add_trace(go.Bar(x=["1 month", "2 months", "3 months"], y=t["Rises caught %"], name="spike alert", marker_color="#c62828"))
+fig.add_trace(go.Bar(x=["1 month", "2 months", "3 months"], y=t["Rises caught %"], name="spike alert", marker_color="#e5484d"))
 fig.add_trace(go.Bar(x=["1 month", "2 months", "3 months"], y=[STRESS_JUMPS_CAUGHT[h] for h in (1, 2, 3)],
-                     name="ALPS Stress label", marker_color="#f9a825"))
+                     name="ALPS Stress label", marker_color="#f5c542"))
 fig.update_layout(height=260, barmode="group", title="Rises above 15% caught", yaxis_title="%",
                   margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h", y=-0.2))
 c2.plotly_chart(fig, width="stretch", config={"displayModeBar": False})

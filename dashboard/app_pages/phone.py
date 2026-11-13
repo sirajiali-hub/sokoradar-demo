@@ -25,7 +25,7 @@ ui.header("On any phone: USSD and SMS", "Farmers and traders without a smartphon
           f"outlook and alerts for their county, in their language ({LANG_NAMES}). Try the same menu here.")
 
 PHONE_CSS = """
-<div style="max-width:320px;margin:auto;background:#1f2933;border-radius:28px;padding:22px 16px 26px">
+<div style="max-width:320px;margin:auto;background:#05090e;border:2px solid #2b3a4d;border-radius:28px;padding:22px 16px 26px">
   <div style="background:#e8f5e9;color:#1b1b1b;border-radius:10px;padding:14px;min-height:260px;
               font-family:monospace;font-size:14px;line-height:1.45;white-space:pre-wrap">{screen}</div>
   <div style="color:#9aa5b1;text-align:center;font-size:12px;margin-top:10px">{status}</div>
@@ -69,7 +69,7 @@ with right:
     lang = c2.selectbox("Language", LANGUAGES, format_func=lambda c: TEXT[c]["name"])
     msg = message_for(county, lang)
     if msg:
-        st.markdown(f"<div style='background:#e3f2fd;border-radius:14px;padding:12px 14px;max-width:360px'>"
+        st.markdown(f"<div style='background:#1f3a5c;color:#e6ebf1;border-radius:14px;padding:12px 14px;max-width:360px'>"
                     f"{escape(msg)}</div>", unsafe_allow_html=True)
         st.caption(f"{len(msg)} characters: fits in one SMS (160).")
     else:

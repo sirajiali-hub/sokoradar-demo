@@ -57,10 +57,10 @@ with right:
     fig = go.Figure()
     labels = [f"{h} month{'s' if h > 1 else ''}" for h in s["horizon"]]
     fig.add_trace(go.Bar(x=labels, y=s["spike_probability_pct"], name="spike chance",
-                         marker_color=["#c62828" if a else "#bdbdbd" for a in s["spike_alert"]]))
+                         marker_color=["#e5484d" if a else "#5b6b7e" for a in s["spike_alert"]]))
     if "alert_threshold_pct" in s:
         fig.add_trace(go.Scatter(x=labels, y=s["alert_threshold_pct"], mode="markers", name="alert line",
-                                 marker=dict(symbol="line-ew-open", size=44, color="black", line=dict(width=2))))
+                                 marker=dict(symbol="line-ew-open", size=44, color="#e6ebf1", line=dict(width=2))))
     fig.update_layout(height=300, margin=dict(l=10, r=10, t=30, b=10), title="Chance of a rise above 15%",
                       yaxis_title="%", legend=dict(orientation="h", y=-0.2))
     st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
