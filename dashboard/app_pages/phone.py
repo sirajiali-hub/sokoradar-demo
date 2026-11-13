@@ -6,7 +6,10 @@ import tempfile
 from html import escape
 from pathlib import Path
 
+import json
+
 import streamlit as st
+import streamlit.components.v1 as components
 
 from src import ui
 
@@ -17,11 +20,12 @@ import menu                                   # noqa: E402  (the real USSD menu)
 from send_sms_alerts import message_for       # noqa: E402
 from sokoradar_data import counties           # noqa: E402
 from i18n import LANGUAGES, TEXT              # noqa: E402
+import voice                                  # noqa: E402
 
 DEMO_PHONE = "+254700000000"
 
 LANG_NAMES = ", ".join(TEXT[c]["name"] for c in LANGUAGES)
-ui.header("On any phone: USSD and SMS", "Farmers and traders without a smartphone dial a short code to get the price "
+ui.header("On any phone: USSD, SMS and voice", "Farmers and traders without a smartphone dial a short code to get the price "
           f"outlook and alerts for their county, in their language ({LANG_NAMES}). Try the same menu here.")
 
 PHONE_CSS = """
@@ -78,9 +82,42 @@ with right:
 **How it works**
 1. A user subscribes through the USSD menu (option 3) and agrees to receive alerts.
 2. When new forecasts arrive, a script sends each subscriber the spike alerts for their county.
-3. The demo uses the Africa's Talking **sandbox**: messages appear in its online phone simulator, not on real phones.
-
-**Languages:** the first screen asks for the language, and SMS come in the language chosen at sign up.
-Gikuyu, Dholuo, Luluhya, Kikamba, Kalenjin and Kimeru switch on as soon as native speakers fill their column in
-`ussd/translations.csv`.
+3. Alerts are sent through Africa's Talking. Live SMS already reach Airtel numbers; Safaricom and other networks need a registered sender ID, the next step.
 """)
+
+st.divider()
+st.subheader("3. The voice alert")
+st.caption("For people who cannot read SMS, SokoRadar can phone them and read the alert. Press Listen to hear the same "
+           "words a call would say, using your browser's voice (English sounds best).")
+v1, v2 = st.columns(2)
+v_county = v1.selectbox("County for the call", counties(), index=counties().index("Kitui") if "Kitui" in counties() else 0, key="vc")
+v_lang = v2.selectbox("Language of the call", LANGUAGES, index=LANGUAGES.index("en") if "en" in LANGUAGES else 0,
+                      format_func=lambda c: TEXT[c]["name"], key="vl")
+words = voice.script(v_county, v_lang)
+BCP = {"en": "en-GB", "sw": "sw-KE", "so": "so-SO"}
+components.html(f"""
+<div style="font-family:sans-serif;color:#e6ebf1">
+  <button id="go" style="background:#ff8a3d;color:#0e1621;border:none;border-radius:8px;padding:10px 22px;font-size:16px;font-weight:700;cursor:pointer">&#9654; Listen</button>
+  <button id="stop" style="background:#182433;color:#e6ebf1;border:1px solid #2b3a4d;border-radius:8px;padding:10px 18px;font-size:16px;margin-left:8px;cursor:pointer">Stop</button>
+  <span id="note" style="margin-left:12px;font-size:14px;color:#9fb0c3"></span>
+</div>
+<script>
+const lines = {json.dumps(words)};
+const lang = {json.dumps(BCP.get(v_lang, "en-GB"))};
+const note = document.getElementById("note");
+function pick() {{
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v => v.lang === lang) || vs.find(v => v.lang.startsWith(lang.slice(0, 2))) || null;
+}}
+document.getElementById("go").onclick = () => {{
+  if (!("speechSynthesis" in window)) {{ note.textContent = "This browser cannot speak."; return; }}
+  speechSynthesis.cancel();
+  const v = pick();
+  note.textContent = v ? "Speaking..." : "No voice for this language here; using the default voice.";
+  lines.forEach(t => {{ const u = new SpeechSynthesisUtterance(t); u.lang = lang; if (v) u.voice = v; u.rate = 0.95; speechSynthesis.speak(u); }});
+}};
+document.getElementById("stop").onclick = () => {{ speechSynthesis.cancel(); note.textContent = ""; }};
+</script>""", height=60)
+st.markdown("".join(f"<p style='margin:4px 0;color:#c9d2db'>“{escape(w)}”</p>" for w in words), unsafe_allow_html=True)
+st.caption("Real calls go through Africa's Talking Voice; our test number request is waiting for approval.")
+
