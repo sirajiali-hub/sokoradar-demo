@@ -5,6 +5,7 @@ First screen: choose the language. Then the main menu in that language.
 Replies start with "CON " (show a menu and wait) or "END " (show an answer and close).
 Keep every screen short: USSD screens hold about 160 to 182 characters.
 """
+import notify
 import subscribers
 from i18n import CHOOSE_LANGUAGE, LANGUAGES, month, t
 from sokoradar_data import CROPS, counties, county_alerts, outlook
@@ -135,6 +136,7 @@ def subscribe_flow(steps, phone, lang):
     if not phone:
         return "END " + T["no_phone"]
     subscribers.add(phone, county, lang)
+    notify.send_later(phone, T["welcome"].format(county=county))      # welcome SMS, in the background
     return "END " + T["subscribed"].format(county=county)
 
 

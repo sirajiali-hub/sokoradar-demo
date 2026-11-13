@@ -24,7 +24,7 @@ SokoRadar: bei za chakula
    ```
    The price now, next month's forecast with its 80% range, the ALPS label, the spike alert, and where to buy when there is a suggestion. "(makadirio)" means the price is an estimate.
 2. **Onyo kaunti yangu:** choose a county and see every crop with a spike alert next month.
-3. **Jiandikishe SMS:** choose a county and agree; the phone number is saved for alert SMS.
+3. **Jiandikishe SMS:** choose a county and agree; the phone number is saved for alert SMS, and a welcome SMS is sent right away in the chosen language (when the app has an Africa's Talking key, see below).
 4. **Jiondoe SMS:** remove the phone number.
 
 Counties are shown 8 per screen: 9 shows more, 0 goes back. Crops: maize, beans (Rosecoco), sorghum and potatoes (red Irish).
@@ -81,6 +81,20 @@ The app picks up the new file by itself; no restart is needed.
    * **For the demo:** deploy this folder on Render (free): new Web Service, root directory `ussd`, build command `pip install -r requirements.txt`, start command `gunicorn app:app`.
 3. In the sandbox, go to **USSD → Create channel**, pick a code, and set the callback URL to `https://<your address>/ussd`.
 4. Open the **simulator**, enter a test phone number, dial the code, and use the menu.
+
+## Welcome SMS on sign up
+
+On Render, open the service's **Environment** tab and add `AT_USERNAME` (`sandbox` for testing) and `AT_API_KEY` (that app's key). Never put the key in GitHub. With them set, everyone who signs up through option 3 gets a welcome SMS; in the sandbox it appears in the Africa's Talking simulator for the number that dialled. Without them, sign up still works and no SMS is sent.
+
+## Voice alerts (calls that read the alert out loud)
+
+For people who cannot read SMS. Africa's Talking phones the person and reads the alert in Kiswahili, English or Somali.
+
+1. In the live Africa's Talking app, go to **Voice → Phone numbers** and request a number (choose **Test Number**). The voice sandbox does not work, so this is needed even for testing.
+2. When it is approved, set that number's **callback URL** to `https://<your Render address>/voice`.
+3. Run `voice_test.sh` (see the main README): it tells this app who will be called, then asks Africa's Talking to place the call.
+
+When the person answers, Africa's Talking asks `POST /voice` what to say, and the app replies with the alert. Calls cost money per minute on the live account. Kiswahili and Somali are read by a computer voice; recorded messages would sound better.
 
 ## Send alert SMS
 

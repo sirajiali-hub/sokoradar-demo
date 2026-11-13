@@ -65,6 +65,21 @@ for k, code in enumerate(LANGUAGES, 1):
     assert dial(f"{L}*4") == "END " + TEXT[code]["unsubscribed"]
     assert dial(f"{L}*4") == "END " + TEXT[code]["was_not"]
 
+# the welcome SMS fits in one message, and nothing is sent when no API key is set
+import notify                          # noqa: E402
+for code in LANGUAGES:
+    for c in counties():
+        w = TEXT[code]["welcome"].format(county=c)
+        assert len(w) <= SMS_MAX, (code, c, len(w))
+assert not notify.enabled() or os.environ.get("AT_API_KEY")
+# voice: prepare a call, then the callback reads the alert in that language; an ended call gets an empty reply
+for code in LANGUAGES:
+    r = client.post("/voice/prepare", data={"phone": "+254700000999", "county": "Kitui", "lang": code}).get_json()
+    assert r["ok"] and r["script"], r
+    x = client.post("/voice", data={"isActive": "1", "destinationNumber": "+254700000999"}).get_data(as_text=True)
+    assert x.startswith("<?xml") and "<Say>" in x and TEXT[code]["voice_bye"] in x, x
+assert client.post("/voice", data={"isActive": "0"}).get_data(as_text=True) == ""
+assert client.post("/voice/prepare", data={"phone": "abc"}).status_code == 400
 assert client.get("/").get_json()["status"] == "ok"
 print(f"All checks passed: {len(LANGUAGES)} languages, {n} counties, {screens} screens, "
       f"every screen within {MAX_CHARS} characters and every SMS within {SMS_MAX}.")
