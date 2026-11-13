@@ -33,7 +33,9 @@ def ussd():
 @app.post("/voice/prepare")
 def voice_prepare():
     """Say who is about to be called: phone, county and language (sent by voice_test.sh just before the call)."""
-    phone, county = request.values.get("phone", ""), request.values.get("county", "Garissa")
+    phone = request.values.get("phone", "").strip().replace(" ", "")
+    phone = phone if phone.startswith("+") else "+" + phone
+    county = request.values.get("county", "Garissa")
     lang = request.values.get("lang", "en")
     if not phone.lstrip("+").isdigit():
         return {"ok": False, "error": "phone must look like +254712345678"}, 400
