@@ -9,7 +9,7 @@ Production:    gunicorn app:app         (Render, Hugging Face Spaces, Railway ..
 """
 import os
 
-from flask import Flask, request
+from flask import Flask, abort, request, send_from_directory
 
 import menu
 import voice
@@ -50,11 +50,19 @@ def voice_callback():
     numbers = [request.values.get(k) for k in ("destinationNumber", "callerNumber", "clientDialedNumber")]
     try:
         county, lang = voice.who(numbers)
-        body = voice.xml(voice.script(county, lang))
+        body = voice.call_xml(county, lang)
     except Exception:
         app.logger.exception("voice error")
         body = voice.xml(["Sorry, SokoRadar cannot read the alert right now. Goodbye."])
     return body, 200, {"Content-Type": "application/xml; charset=utf-8"}
+
+
+@app.get("/audio/<name>")
+def audio(name):
+    """Recorded voice alerts, played in calls."""
+    if not name.endswith(".mp3") or "/" in name or ".." in name:
+        abort(404)
+    return send_from_directory(voice.AUDIO, name, mimetype="audio/mpeg")
 
 
 @app.get("/")

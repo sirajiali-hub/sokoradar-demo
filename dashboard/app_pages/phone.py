@@ -94,8 +94,13 @@ v_county = v1.selectbox("County for the call", counties(), index=counties().inde
 v_lang = v2.selectbox("Language of the call", LANGUAGES, index=LANGUAGES.index("en") if "en" in LANGUAGES else 0,
                       format_func=lambda c: TEXT[c]["name"], key="vl")
 words = voice.script(v_county, v_lang)
+rec = voice.recording(v_county, v_lang)
+if rec:
+    st.audio(str(rec), format="audio/mpeg")
+    st.caption(f"A real voice recording ({rec.name}). Phone calls play the same recording.")
 BCP = {"en": "en-GB", "sw": "sw-KE", "so": "so-SO"}
-components.html(f"""
+if not rec:
+  components.html(f"""
 <div style="font-family:sans-serif;color:#e6ebf1">
   <button id="go" style="background:#ff8a3d;color:#0e1621;border:none;border-radius:8px;padding:10px 22px;font-size:16px;font-weight:700;cursor:pointer">&#9654; Listen</button>
   <button id="stop" style="background:#182433;color:#e6ebf1;border:1px solid #2b3a4d;border-radius:8px;padding:10px 18px;font-size:16px;margin-left:8px;cursor:pointer">Stop</button>
@@ -118,6 +123,8 @@ document.getElementById("go").onclick = () => {{
 }};
 document.getElementById("stop").onclick = () => {{ speechSynthesis.cancel(); note.textContent = ""; }};
 </script>""", height=60)
+  st.caption("No recording for this county and language yet, so your browser's computer voice reads it. "
+             "Recordings go in ussd/audio (see its README).")
 st.markdown("".join(f"<p style='margin:4px 0;color:#c9d2db'>“{escape(w)}”</p>" for w in words), unsafe_allow_html=True)
 st.caption("Real calls go through Africa's Talking Voice; our test number request is waiting for approval.")
 

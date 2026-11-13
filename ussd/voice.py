@@ -8,13 +8,17 @@ How a call works:
 A subscriber who signed up through USSD is read the county and language they chose; anyone else gets the
 prepared county and language, or Garissa in English.
 """
+import os
 import time
+from pathlib import Path
 from xml.sax.saxutils import escape
 
 import subscribers
 from i18n import LANGUAGES, month, t
 from sokoradar_data import county_alerts
 
+AUDIO = Path(__file__).parent / "audio"
+PUBLIC_URL = os.environ.get("PUBLIC_URL", "https://sokoradar-ussd.onrender.com")
 PENDING = {}                  # phone -> (county, lang, time prepared); kept in memory for 15 minutes
 PENDING_MINUTES = 15
 
@@ -59,3 +63,21 @@ def script(county, lang):
 def xml(lines):
     says = "".join(f"<Say>{escape(s)}</Say>" for s in lines)
     return f'<?xml version="1.0" encoding="UTF-8"?><Response>{says}</Response>'
+
+
+def recording_name(county, lang):
+    return f"{county.lower().replace(' ', '-')}_{lang}.mp3"
+
+
+def recording(county, lang):
+    """Path of a recorded voice alert for this county and language, or None."""
+    p = AUDIO / recording_name(county, lang)
+    return p if p.exists() else None
+
+
+def call_xml(county, lang):
+    """A real voice plays when we have one; otherwise the computer voice reads the script."""
+    if recording(county, lang):
+        return (f'<?xml version="1.0" encoding="UTF-8"?><Response>'
+                f'<Play url="{PUBLIC_URL}/audio/{recording_name(county, lang)}"/></Response>')
+    return xml(script(county, lang))
