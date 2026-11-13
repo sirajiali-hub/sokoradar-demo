@@ -78,5 +78,9 @@ with right:
 **How it works**
 1. A user subscribes through the USSD menu (option 3) and agrees to receive alerts.
 2. When new forecasts arrive, a script sends each subscriber the spike alerts for their county.
-3. Alerts are sent through Africa's Talking. Real SMS reach Airtel and international numbers; Safaricom needs a registered sender ID, the next step.
+3. The demo uses the Africa's Talking **sandbox**: messages appear in its online phone simulator, not on real phones.
+
+**Languages:** the first screen asks for the language, and SMS come in the language chosen at sign up.
+Gikuyu, Dholuo, Luluhya, Kikamba, Kalenjin and Kimeru switch on as soon as native speakers fill their column in
+`ussd/translations.csv`.
 """)
