@@ -8,9 +8,11 @@ Keep every screen short: USSD screens hold about 160 to 182 characters.
 import notify
 import subscribers
 from i18n import CHOOSE_LANGUAGE, LANGUAGES, month, t
+from send_sms_alerts import message_for
 from sokoradar_data import CROPS, counties, county_alerts, outlook
 
 PAGE = 8          # counties per screen; 9 = next page, 0 = previous page
+MAX_SCREEN = 182  # characters a USSD screen can hold
 
 
 def handle(text, phone=""):
@@ -78,7 +80,9 @@ def price_flow(steps, phone, lang):
     ptype, steps, screen = pick_from(steps, list(T["types"].items()), T["pick_type"], lang)
     if screen:
         return screen
-    return price_answer(county, crop, ptype, lang)
+    screen = price_answer(county, crop, ptype, lang)
+    has_data = outlook(county, crop, ptype, horizon=1) is not None
+    return also_by_sms(screen, phone, lang) if has_data else screen
 
 
 def price_answer(county, crop, ptype, lang):
@@ -107,7 +111,9 @@ def alerts_flow(steps, phone, lang):
     county, steps, screen = pick_county(steps, lang)
     if screen:
         return screen
-    return alerts_answer(county, lang)
+    screen = alerts_answer(county, lang)
+    # the SMS is the same short alert subscribers get each month (always one SMS)
+    return also_by_sms(screen, phone, lang, message_for(county, lang)) if county_alerts(county, horizon=1) else screen
 
 
 def alerts_answer(county, lang):
@@ -120,6 +126,32 @@ def alerts_answer(county, lang):
         lines.append(f"- {T['crops'][r['commodity']]}: KES {r['forecast_price_kes']:.0f} "
                      f"({r['range_low_kes']:.0f}-{r['range_high_kes']:.0f})")
     return "\n".join(lines)
+
+
+# --------------------------------------------------------------------------- a copy by SMS
+SMS_MAX = 160     # characters in one SMS
+
+
+def _fit(lines, limit, lang):
+    """Drop the least important lines until the text fits: the season line first, then the cheaper-nearby line."""
+    T = t(lang)
+    for key in ("season", "cheaper"):
+        if len("\n".join(lines)) <= limit:
+            break
+        start = T[key].split("{")[0]
+        lines = [x for x in lines if not (start and x.startswith(start))]
+    return lines
+
+
+def also_by_sms(screen, phone, lang, sms=None):
+    """A USSD screen disappears when the session ends, so the answer is also sent by SMS to keep.
+    The screen says so only when an SMS is really on its way (SMS sending is set up and we know the phone).
+    Both the screen and the SMS keep the alert lines; the season and cheaper-nearby lines go first if space is short."""
+    body = screen[4:].split("\n")
+    sms = sms or "\n".join(_fit(["SokoRadar"] + body, SMS_MAX, lang))
+    if not (phone and notify.send_later(phone, sms)):
+        return screen
+    return "END " + "\n".join(_fit(body + [t(lang)["sms_copy"]], MAX_SCREEN - 4, lang))
 
 
 # --------------------------------------------------------------------------- 3 and 4. SMS sign-up

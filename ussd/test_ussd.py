@@ -25,6 +25,7 @@ def dial(text):
     body = r.get_data(as_text=True)
     assert r.status_code == 200, (text, r.status_code)
     assert body.startswith(("CON ", "END ")), (text, body)
+    assert "kuna tatizo" not in body, f"{text!r} hit an error in the menu code (see the log above)"
     assert len(body) <= MAX_CHARS, f"{text!r} is {len(body)} chars:\n{body}"
     screens += 1
     return body
@@ -73,6 +74,26 @@ for code in LANGUAGES:
         w = TEXT[code]["welcome"].format(county=c)
         assert len(w) <= SMS_MAX, (code, c, len(w))
 assert not notify.enabled() or os.environ.get("AT_API_KEY")
+# a copy by SMS: with sending switched on, price and alert answers are also texted, and the screen still fits
+sent = []
+real_send = notify.send_later
+notify.send_later = lambda phone, message: sent.append((phone, message)) or True
+for k, code in enumerate(LANGUAGES, 1):
+    for i in range(n):
+        page, pos = divmod(i, 8)
+        pick = "*9" * page + f"*{pos + 1}"
+        for crop in "1234":
+            for ptype in "12":
+                before = len(sent)
+                s = dial(f"{k}*1{pick}*{crop}*{ptype}")
+                assert s.endswith(TEXT[code]["sms_copy"]) == (len(sent) > before), s
+        before = len(sent)
+        s = dial(f"{k}*2{pick}")
+        if len(sent) > before:
+            assert s.endswith(TEXT[code]["sms_copy"]) and sent[-1][1].startswith("SokoRadar"), s
+notify.send_later = real_send
+assert sent and all(p == PHONE and len(m) <= SMS_MAX for p, m in sent), max(len(m) for _, m in sent)
+copies = len(sent)
 # voice: prepare a call, then the callback reads the alert in that language; an ended call gets an empty reply
 for code in LANGUAGES:
     r = client.post("/voice/prepare", data={"phone": "+254700000999", "county": "Kitui", "lang": code}).get_json()
@@ -86,4 +107,5 @@ assert client.post("/voice", data={"isActive": "0"}).get_data(as_text=True) == "
 assert client.post("/voice/prepare", data={"phone": "abc"}).status_code == 400
 assert client.get("/").get_json()["status"] == "ok"
 print(f"All checks passed: {len(LANGUAGES)} languages, {n} counties, {screens} screens, "
-      f"every screen within {MAX_CHARS} characters and every SMS within {SMS_MAX}.")
+      f"every screen within {MAX_CHARS} characters and every SMS within {SMS_MAX}; "
+      f"{copies} answers also sent by SMS.")
