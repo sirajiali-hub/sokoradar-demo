@@ -1,7 +1,7 @@
 """Where to buy: is a nearby county cheaper, and does the saving survive the cost of the trip?"""
 import streamlit as st
 
-from src import transport, ui
+from src import location, transport, ui
 from src.data import CORE, commodities, forecasts, month_name
 from src.results import WHERE_TO_BUY
 
@@ -11,7 +11,8 @@ ui.data_note()
 fc = forecasts()
 c1, c2, c3 = st.columns(3)
 crop = c1.selectbox("Crop", [c for c in commodities(fc) if c in CORE])
-county = c2.selectbox("Your county", sorted(fc["county"].unique()), index=sorted(fc["county"].unique()).index("Nairobi"))
+all_counties = sorted(fc["county"].unique())
+county = c2.selectbox("Your county", all_counties, index=location.default_index(all_counties, "Nairobi"))
 ptype = c3.radio("Price", ["Wholesale", "Retail"], horizontal=True)
 c4, c5, c6 = st.columns(3)
 vehicle = c4.selectbox("Vehicle", list(transport.vehicles().index), index=2)

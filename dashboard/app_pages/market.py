@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from src import charts, ui
+from src import charts, location, ui
 from src.data import PHASE_COLOR, PHASE_TEXT, commodities, forecasts, history, month_name
 from src.results import FORECAST_ERROR
 
@@ -15,7 +15,7 @@ c1, c2, c3 = st.columns(3)
 crop = c1.selectbox("Crop", commodities(fc))
 f1 = fc[fc["commodity"] == crop]
 order = f1[f1["horizon"] == 1].sort_values("spike_probability_pct", ascending=False)["county"].drop_duplicates().tolist()
-county = c2.selectbox("County", order, help="Highest spike chance first.")
+county = c2.selectbox("County", order, index=location.default_index(order, order[0]), help="Highest spike chance first.")
 ptype = c3.radio("Price", sorted(f1[f1["county"] == county]["price_type"].unique()), horizontal=True)
 s = f1[(f1["county"] == county) & (f1["price_type"] == ptype)].sort_values("horizon")
 if s.empty:

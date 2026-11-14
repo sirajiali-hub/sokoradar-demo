@@ -11,7 +11,7 @@ import json
 import streamlit as st
 import streamlit.components.v1 as components
 
-from src import ui
+from src import location, ui
 
 USSD = Path(__file__).resolve().parents[2] / "ussd"
 os.environ.setdefault("SOKORADAR_SUBSCRIBERS", os.path.join(tempfile.gettempdir(), "sokoradar_demo_subscribers.csv"))
@@ -69,7 +69,7 @@ with left:
 with right:
     st.subheader("2. The alert SMS")
     c1, c2 = st.columns(2)
-    county = c1.selectbox("Subscriber's county", counties(), index=counties().index("Garissa") if "Garissa" in counties() else 0)
+    county = c1.selectbox("Subscriber's county", counties(), index=location.default_index(counties(), "Garissa"))
     lang = c2.selectbox("Language", LANGUAGES, format_func=lambda c: TEXT[c]["name"])
     msg = message_for(county, lang)
     if msg:
@@ -82,5 +82,5 @@ with right:
 **How it works**
 1. A user subscribes through the USSD menu (option 3) and agrees to receive alerts.
 2. When new forecasts arrive, a script sends each subscriber the spike alerts for their county.
-3. Alerts are sent through Africa's Talking. Live SMS already reach Airtel numbers; Safaricom and other networks need a registered sender ID, the next step.
+3. Alerts are sent through Africa's Talking. Live SMS and voice calls already reach Airtel numbers (the call plays a recorded alert for Kitui; other counties use a computer voice). Safaricom and other networks need a registered sender ID, the next step.
 """)

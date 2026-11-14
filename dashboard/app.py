@@ -5,6 +5,7 @@ from pathlib import Path
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).parent))          # so pages can import src.*
+from src import location  # noqa: E402
 
 st.set_page_config(page_title="SokoRadar", page_icon="🌽", layout="wide")
 
@@ -19,4 +20,5 @@ pages = st.navigation([
 with st.sidebar:
     st.markdown("## :orange[SokoRadar]")
     st.caption("Early warning of food price shocks in Kenyan counties. Group 10, Moringa School capstone.")
+    location.sidebar()
 pages.run()
