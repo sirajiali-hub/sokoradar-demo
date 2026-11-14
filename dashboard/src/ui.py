@@ -17,7 +17,7 @@ def data_note():
     m = meta()
     origin = pd.Period(m["forecast_from"], freq="M")
     st.caption(f"Forecasts made from **{month_name(origin)}** prices (the latest month in the data), for the next 1 to 3 months. "
-               "Only about 7% of county prices were recorded in a market; the rest are estimates. "
+               "Only a small share of county prices were recorded in a market; the rest are estimates. "
                "An alert means higher risk, not a certain price rise.")
 
 

@@ -24,7 +24,7 @@ early enough to act?**
 | Where to buy | Which nearby county is cheaper, after transport? |
 
 #### How it works
-1. **Data:** a monthly price panel for 1,222 county series (47 counties, retail and wholesale), 2006 to 2024, with rainfall,
+1. **Data:** a monthly price panel for 1,222 county series (47 counties, retail and wholesale), 2006 to today, with rainfall,
    vegetation, fuel and exchange rate data.
 2. **Price forecast:** ARIMA on log prices, 1 to 3 months ahead.
 3. **Spike alert:** a LightGBM model gives the chance of a rise above 15%; an alert fires above a fixed line.

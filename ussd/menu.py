@@ -140,6 +140,8 @@ def _fit(lines, limit, lang):
             break
         start = T[key].split("{")[0]
         lines = [x for x in lines if not (start and x.startswith(start))]
+    if len("\n".join(lines)) > limit:                   # still long (many crops): drop the list dashes
+        lines = [x[2:] if x.startswith("- ") else x for x in lines]
     return lines
 
 

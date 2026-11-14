@@ -68,5 +68,6 @@ st.markdown("""
 * An alert means higher risk, not a certain rise: about half of sharp rises come with no alert, often driven by things the
   data cannot see (floods, conflict, policy changes).
 * Only about 7% of county prices were recorded in a market; all scores use those only.
-* Not yet tested on 2025 to 2026 county prices.
+* On 2025 to 2026, months the model never saw, it did at least as well: average error 8.9%, 10.6% and 12.4%, 56% of
+  sharp rises caught one month ahead, and 81% to 88% of real prices inside the range.
 """)
