@@ -79,5 +79,5 @@ def call_xml(county, lang):
     """A real voice plays when we have one; otherwise the computer voice reads the script."""
     if recording(county, lang):
         return (f'<?xml version="1.0" encoding="UTF-8"?><Response>'
-                f'<Play url="{PUBLIC_URL}/audio/{recording_name(county, lang)}"/></Response>')
+                f'<Play url="{PUBLIC_URL}/audio/{recording_name(county, lang)}?v={recording(county, lang).stat().st_size}"/></Response>')
     return xml(script(county, lang))
